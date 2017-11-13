@@ -161,6 +161,8 @@ number true positives: 138, number false positives: 3, number false negatives: 1
 
 ![alt text][image5]
 
+The final jupyter notebook implementation can be found [here](https://github.com/thassan743/RoboND-DeepLearning-Project/blob/master/code/model_training.ipynb).
 
+A saved html version of the notebook can be found [here](https://github.com/thassan743/RoboND-DeepLearning-Project/blob/master/model_training.html). All the results and images shown in this writeup can be found in the saved html notebook.
 
-https://github.com/thassan743/RoboND-DeepLearning-Project/blob/master/model_training.html
+The weights for the model can be found [here](https://github.com/thassan743/RoboND-DeepLearning-Project/blob/master/data/weights/model_weights). This weights file can be used to test the model with the Udacity Follow Me Simulator found [here](https://github.com/udacity/RoboND-DeepLearning-Project/releases/tag/v1.2.2).
