@@ -166,3 +166,15 @@ The final jupyter notebook implementation can be found [here](https://github.com
 A saved html version of the notebook can be found [here](https://github.com/thassan743/RoboND-DeepLearning-Project/blob/master/model_training.html). All the results and images shown in this writeup can be found in the saved html notebook.
 
 The weights for the model can be found [here](https://github.com/thassan743/RoboND-DeepLearning-Project/blob/master/data/weights/model_weights). This weights file can be used to test the model with the Udacity Follow Me Simulator found [here](https://github.com/udacity/RoboND-DeepLearning-Project/releases/tag/v1.2.2).
+
+#### Future Enhancements
+
+There is quite a bit of work that can be done to improve the performance of the network. The first thing I would do is gather a lot more data. Data can be collected to target the specific shortfalls of the existing model, most notably the identification of the hero from a distance. If a significant amount of data is gathered, most of which has the hero present in the image at varying distances, I think this will have a significant effect on the models performance. Additionally, one could use data augmentation techniques to increase the dataset size. A common one which I have seen being used is to flip each of the training images, thereby effectively doubling the size of the dataset without much work. Other techniques include applying varying degrees of rotation or colour distortions to the images. In all cases, the hyper-parameters would need to be adjusted to account for the extra data, most importantly the `batch_size` and `steps_per_epoch`.
+
+The size and depth of the model could also be increased, however, this would add more complexity and increase training time. While this may yield a better score, the current network architecture performs reasonably well already, and the gains may not be worth the extra effort.
+
+The default code in the notebook uses an image size of 160x160, however the original training images are of size 256x256. We are therefore throwing away a significant amount of image data. Using the full image may increase the performance of the network at the expense of some training time, however this has not been tested as yet.
+
+Finally, changes to the Keras model, such as using a different optimizer, may also offer some performance improvements.
+
+As an additional consideration, as mentioned in the rubric, how well would the current model and data work for following another object such as a dog or a car? While the model architecture may transfer well to other objects, the trained network certainly would not. The network was trained on data containing people and some other objects such as buildings and trees, but was trained to identify a specific person. Therefore, it would not work at all trying to identify any other object. However, if an equivalent dataset were captured of the new object and the existing model retrained on the new data, I do believe the network would perform reasonably well, as long as the data used was adequate.
