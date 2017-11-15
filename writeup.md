@@ -97,7 +97,9 @@ The 1x1 convolution layer used here has a filter depth of 128. This results in a
 
 #### Decoder
 
-The purpose of the decoder is to upsample the image. We saw that in the previous layers, the size of the image was significantly smaller than the original input image. However, in order to perform semantic segmentation on the original input image, we need the output to be of the same size as the input. In this way, we can obtain information from each pixel in the image in order to identify an object (the hero) and also the location of the object. The decoder layers used here both have a bilinear upsample factor of 2. Decoder 1 has a filter depth of 64 and includes a skip connection from the output of Encoder 1. The output from this decoder is therefore 80x80x64. Decoder 2 has a filter depth of 32 and a skip connection from the input. The output from this decoder is then 160x160x32. We can see that the shape of the output matches that of the input image.
+The purpose of the decoder is to upsample the image. We saw that in the previous layers, the size of the image was significantly smaller than the original input image. However, in order to perform semantic segmentation on the original input image, we need the output to be of the same size as the input. In this way, we can obtain information from each pixel in the image in order to identify an object (the hero) and also the location of the object. Here we also make use of skip connections by concatenating inputs to the decoder layers with the input image or outputs from encoder layers. By doing this, we are allowing the network to learn from information that may have been lost during the encoding steps.
+
+The decoder layers used here both have a bilinear upsample factor of 2. Decoder 1 has a filter depth of 64 and includes a skip connection from the output of Encoder 1. The output from this decoder is therefore 80x80x64. Decoder 2 has a filter depth of 32 and a skip connection from the input. The output from this decoder is then 160x160x32. We can see that the shape of the output matches that of the input image.
 
 ### Hyper-Parameters
 
