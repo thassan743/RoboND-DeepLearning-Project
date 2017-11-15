@@ -60,7 +60,7 @@ The final step of the decoder is to add additional separable convolutions such t
 
 #### The Network
 
-Now that we have a completed encoder and decoder, we can build the FCN model. The architecture I used was very simple and similar to the one used in the segmentation lab. With this model I was able to achieve the required final score. The final model implementation can be seen below:
+Now that we have a completed encoder and decoder, we can build the FCN model. My plan was to keep the model as simple as possible initially to get a baseline for the performance with different hyper-parameters, and then increase the complexity from there if necessary. In the end i was able to achieve the required final score with this model after some adjustments and tuning. This will be discussed in further detail later. The final model implementation can be seen below:
 
 ```
 def fcn_model(inputs, num_classes):
@@ -81,13 +81,23 @@ def fcn_model(inputs, num_classes):
     return layers.Conv2D(num_classes, 1, activation='softmax', padding='same')(l_dec_2)
 ```
 
-The architecture used for the FCN is two encoder layers, a 1x1 convolution layer and two decoder layers. There are also two skip connections from Encoder 1 to Decoder 1 and from the input to Decoder 2 which make use of the layer concatenation step of the decoder. The architecture can be seen in the image below.
-
-The input to the network is an image of size 160x160x3. The first encoder has a filter depth of 32 and a stride of 2 which results in an output from the encoder of 80x80x32. Similarly for encoder 2 which has a filter depth of 64, the output is 40x40x64. The 1x1 convolution layer has a filter depth of 128 and an output of 40x40x128. The decoder layers both have a bilinear upsample factor of 2. Decoder 1 has a filter depth of 64 and includes a skip connection from the output of Encoder 1. The output from this decoder is therefore 80x80x64. Finally, Decoder 2 has a filter depth of 32 and a skip connection from the input. The output from this decoder is then 160x160x32. We can see that the shape of the output matches that of the input image.
-
-As mentioned, this model was similar to the one that was used in the segmentation lab. The model I started with had the same architecture except that each layer was half as deep as the final model, i.e the 1x1 convolution layer had a filter depth of 64 etc. With this model, I was able to achieve just over 40%. Increasing the depth, there was an improvement of approximately 2%.
+The architecture used for the FCN consists of two encoder layers, a 1x1 convolution layer and two decoder layers. There are also two skip connections from Encoder 1 to Decoder 1 and from the input to Decoder 2 which make use of the layer concatenation step of the decoder. The architecture can be seen in the image below. My initial model had the same architecture except that each layer had half the filter depth the final model shown above. With that model, I was able to achieve just over 40%. By increasing the depth, the performance improved by approximately 2%. The network is discussed in more detail below.
 
 ![alt text][image1]
+
+#### Encoder
+
+The input to the network is an image of size 160x160x3. This image is passed through 2 encoders. The purpose of an encoder is to extract features from the input image. Having a number of encoder layers after each other allows the network to extract more complex features the deeper the network goes. For this project, I was able to achieve the required result using 2 encoders. The first encoder has a filter depth of 32 and a stride of 2 which results in an output image from the encoder of dimensions 80x80x32. Similarly for encoder 2 which has a filter depth of 64, the output is an image with dimensions of 40x40x64.
+
+#### 1x1 Convolution (vs. Fully Connected Layers)
+
+The use of a 1x1 convolution layer in the network is very important. In conventional CNNs, a fully connected layer is normally used when training a classifier. However, the output of this type of network is a 2D tensor, and therefore all spatial information about the input is lost. By using a 1x1 convolution in an FCN, the output is a 4D tensor and therefore it retains spatial information. By retaining spatial information, we are able to locate specific objects in the image and not just classify objects. This is essential in order to allow a system to locate and follow a specific target in an image.
+
+The 1x1 convolution layer used here has a filter depth of 128. This results in an output image of 40x40x128.
+
+#### Decoder
+
+The purpose of the decoder is to upsample the image. We saw that in the previous layers, the size of the image was significantly smaller than the original input image. However, in order to perform semantic segmentation on the original input image, we need the output to be of the same size as the input. In this way, we can obtain information from each pixel in the image in order to identify an object (the hero) and also the location of the object. The decoder layers used here both have a bilinear upsample factor of 2. Decoder 1 has a filter depth of 64 and includes a skip connection from the output of Encoder 1. The output from this decoder is therefore 80x80x64. Decoder 2 has a filter depth of 32 and a skip connection from the input. The output from this decoder is then 160x160x32. We can see that the shape of the output matches that of the input image.
 
 #### Hyper-Parameters
 
@@ -101,17 +111,19 @@ steps_per_epoch = 200
 validation_steps = 50
 workers = 8
 ```
-Not much time was spent tuning the hyper-parameters since I was able to reach the required score fairly quickly.
+Not much time was spent tuning the hyper-parameters since I was able to reach the required score fairly quickly. That being said, there was 
 
-For the `learning_rate`, I started at 0.01 and then halved it to 0.005 in the final model.
+**learning_rate:** I started with a learning rate of 0.01 and then decreased it to 0.005. Decreasing the learning rate resulted in a slower decrease in the loss curves, requiring a longer training time, but ultimately a lower loss at the end of the training.
 
-For the `batch_size`, I started at 64 and didn't need to change it. There were no issues with memory when training on AWS so I could have tried increasing the batch size.
+**batch_size:** The number of images used for training in a single step. Too large of a batch size may cause the system to run out of memory. I started with a batch size of 64 and didn't need to change it. I did not experience any issues with memory during training on AWS so I could have tried increasing the batch size even more, however there was no need.
 
-Again, for the `num_epochs`, I set it to 20 initially which seemed to work. I've seen some other people training for many more epochs with only slight improvements. For my model I found 20 worked. If I pushed for a better score I would probably increase this.
+**num_epochs:** The number of training cycles to perform. For the number of epochs, I found that after about 20 epochs, there was only a slight increase in performance for the added training time. However, I have seen some other people training for many more epochs and have seen improvements. For my model I left it at 20 and was able to achieve the required IoU score. If I were to try and improve the score, I would probably increase the number of epochs considerably to see what improvements can be achieved.
 
-I left `steps_per_epoch` at the default value of 200. The same with `validation_steps` which I left at 50.
+**steps_per_epoch:** The number of batches to train on in a single epoch. I left this at the default value of 200.
 
-The number of `workers` I increased from 2 to 8 to account for the extra processing power of the AWS instance.
+**validation_steps:** The number of batches to use during validation of a single epoch. I also left this at the default value of 50.
+
+**workers:** The number of processes to use. I increased this from 2 to 8 but did not notice any signicant changes in performance or speed. In the end I just left it at 8.
 
 #### Results
 
