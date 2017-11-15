@@ -20,7 +20,7 @@ The focus of this project was to train a deep neural network that can be used on
 
 Below I will discuss some of the code used in the implementation of the network, the final network structure that was used, the results achieved, and possible improvements to the project.
 
-#### The Code
+### The Code
 
 The first step in the provided jupyter notebook was to complete the `encoder block`. The final implementation can be seen below:
 
@@ -58,7 +58,7 @@ The second step implements layer concatenation, which is similar to skip connect
 
 The final step of the decoder is to add additional separable convolutions such that the network is able to extract the extra spatial information from the higher resolution layers concatenated in the previous step. Here, two `separable_conv2d_batchnorm` were added.
 
-#### The Network
+### The Network
 
 Now that we have a completed encoder and decoder, we can build the FCN model. My plan was to keep the model as simple as possible initially to get a baseline for the performance with different hyper-parameters, and then increase the complexity from there if necessary. In the end i was able to achieve the required final score with this model after some adjustments and tuning. This will be discussed in further detail later. The final model implementation can be seen below:
 
@@ -99,7 +99,7 @@ The 1x1 convolution layer used here has a filter depth of 128. This results in a
 
 The purpose of the decoder is to upsample the image. We saw that in the previous layers, the size of the image was significantly smaller than the original input image. However, in order to perform semantic segmentation on the original input image, we need the output to be of the same size as the input. In this way, we can obtain information from each pixel in the image in order to identify an object (the hero) and also the location of the object. The decoder layers used here both have a bilinear upsample factor of 2. Decoder 1 has a filter depth of 64 and includes a skip connection from the output of Encoder 1. The output from this decoder is therefore 80x80x64. Decoder 2 has a filter depth of 32 and a skip connection from the input. The output from this decoder is then 160x160x32. We can see that the shape of the output matches that of the input image.
 
-#### Hyper-Parameters
+### Hyper-Parameters
 
 The Hyper-Parameters used in my final model were as follows:
 
@@ -125,7 +125,7 @@ Not much time was spent tuning the hyper-parameters since I was able to reach th
 
 **workers:** The number of processes to use. I increased this from 2 to 8 but did not notice any signicant changes in performance or speed. In the end I just left it at 8.
 
-#### Results
+### Results
 
 Using the above network architecture, I trained the network using an AWS instance. Before collecting any additional data, I trained with the provided data. While the performance with the provided data is not optimal (which will be discussed later), I found that I was able to achieve the required accuracy of 40% without gathering any additional data.
 
@@ -179,7 +179,7 @@ A saved html version of the notebook can be found [here](https://github.com/thas
 
 The weights for the model can be found [here](https://github.com/thassan743/RoboND-DeepLearning-Project/blob/master/data/weights/model_weights). This weights file can be used to test the model with the Udacity Follow Me Simulator found [here](https://github.com/udacity/RoboND-DeepLearning-Project/releases/tag/v1.2.2).
 
-#### Future Enhancements
+### Future Enhancements
 
 There is quite a bit of work that can be done to improve the performance of the network. The first thing I would do is gather a lot more data. Data can be collected to target the specific shortfalls of the existing model, most notably the identification of the hero from a distance. If a significant amount of data is gathered, most of which has the hero present in the image at varying distances, I think this will have a significant effect on the models performance. Additionally, one could use data augmentation techniques to increase the dataset size. A common one which I have seen being used is to flip each of the training images, thereby effectively doubling the size of the dataset without much work. Other techniques include applying varying degrees of rotation or colour distortions to the images. In all cases, the hyper-parameters would need to be adjusted to account for the extra data, most importantly the `batch_size` and `steps_per_epoch`.
 
